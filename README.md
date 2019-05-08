@@ -23,4 +23,8 @@ A dice rolling service.
 
 ## Run via Docker:
 
-    mage -v docker dockerRun
+    mage -v buildDocker docker
+
+## Run via minikube
+
+    mage -v buildMinikube minikube

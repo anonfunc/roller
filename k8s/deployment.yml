@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: roller
+  labels:
+    app: roller
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      name: roller
+  selector:
+    app: roller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roller
+  labels:
+    app: roller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: roller
+  template:
+    metadata:
+      labels:
+        app: roller
+    spec:
+      containers:
+        - name: roller
+          image: anonfunc/roller:latest
+          ports:
+          - containerPort: 3000
+          imagePullPolicy: IfNotPresent
