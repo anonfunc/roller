@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
@@ -69,4 +70,34 @@ func Minikube() error {
 	}
 	fmt.Printf("%s/roll/2d6\n", url)
 	return nil
+}
+
+func BuildGCR() error {
+	mg.Deps(BuildDocker)
+	cmd := exec.Command("docker", "tag", "anonfunc/roller", "gcr.io/" +gcrProjectID()+ "/roller")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+func PushGCR() error {
+	mg.Deps(BuildGCR)
+	cmd := exec.Command("docker", "push", "gcr.io/" +gcrProjectID()+ "/roller")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
+
+var projectID string
+
+func gcrProjectID() string {
+	if projectID != "" {
+		return projectID
+	}
+	id, err := sh.Output("sh", "-c", "gcloud projects list --filter 'name=Roller' | tail -1 | cut -f1 -d' '")
+	if err != nil {
+		panic(err)
+	}
+	projectID = id
+	return id
 }

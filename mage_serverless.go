@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 )
 
 // *** SAM Build ***
@@ -25,7 +26,7 @@ const ServiceName = "roller"
 // to always be "Prod".
 var Stage = os.Getenv("STAGE")
 var Region = endpoints.UsWest2RegionID
-var BucketName = os.Getenv("SAM_BUCKET")  // Overrode later
+var BucketName = os.Getenv("SAM_BUCKET") // Overrode later
 var StackName = ServiceName + "-" + Stage
 
 func DeploySAM() error {
@@ -76,7 +77,8 @@ func makeBucket() error {
 }
 
 func samPackage() error {
-	cmd := exec.Command("sam", "package", "--output-template-file", "packaged.yml",
+	cmd := exec.Command("sam", "package",
+		"--output-template-file", "packaged.yml",
 		"--s3-bucket", bucketName())
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -93,7 +95,8 @@ func bucketName() string {
 	if err != nil {
 		panic("could not get caller identity: " + err.Error())
 	}
-	BucketName = strings.ToLower(fmt.Sprintf("roller-%s-%s", Stage, *output.Account))
+	BucketName = strings.ToLower(fmt.Sprintf("roller-%s-%s",
+		Stage, *output.Account))
 	fmt.Printf("Deployment bucket name is %s\n", BucketName)
 	return BucketName
 }
@@ -109,4 +112,16 @@ func awsSession() *session.Session {
 		panic("could not get AWS session: " + err.Error())
 	}
 	return sess
+}
+
+// *** GCP Cloud Function
+
+func CloudFunction() error {
+	return sh.Run("gcloud", "functions", "deploy","DiceRoller",
+		"--trigger-http", "--runtime", "go111", "--source", "fn")
+}
+
+
+func RemoveCloudFunction() error {
+	return sh.Run("gcloud", "functions", "delete","DiceRoller")
 }

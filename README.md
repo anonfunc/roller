@@ -7,7 +7,32 @@ A dice rolling service.
     mage build
     ./roller
 
-# Serverless
+# Containers
+
+## Run via Docker:
+
+    mage -v buildDocker docker
+
+## Run via minikube
+
+    mage -v buildMinikube minikube
+
+## Skaffold
+
+    skaffold dev -d anonfunc
+
+## GCP
+
+    ### Prerequisites ###
+    gcloud auth configure-docker
+    gcloud projects create --name "Roller"
+    # Create the GKE cluster at https://console.cloud.google.com/kubernetes/
+    # Connect to GKE cluster via clicky clicky.
+    
+    
+    
+
+# Cloud Serverless
 
 ## Deploy via SAM / AWS Lambda
 
@@ -18,13 +43,6 @@ A dice rolling service.
 
     mage -v runSAM
 
-
-# Containers
-
-## Run via Docker:
-
-    mage -v buildDocker docker
-
-## Run via minikube
-
-    mage -v buildMinikube minikube
+## GCP Cloud Function
+    
+    mage -v cloudFunction
